@@ -1,0 +1,106 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum WishlistType {
+  PERSONAL
+  COLLABORATIVE
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  username       String?         @unique
+  hasSetUsername Boolean         @default(false)
+  name           String?
+  password       String          
+  profileImage   String?         
+  wishlists      Wishlist[]
+  paymentInfos   PaymentInfo[]
+  collaborators  Collaborator[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([email], name: "idx_user_email")
+}
+
+model Wishlist {
+  id             Int             @id @default(autoincrement())
+  title          String
+  description    String?
+  eventDate      DateTime?
+  type           WishlistType
+  userId         Int
+  items          Item[]
+  collaborators  Collaborator[]
+  polls          Poll[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_wishlist_user")
+}
+
+model Item {
+  id            Int            @id @default(autoincrement())
+  name          String
+  details       String?
+  price         Float
+  link          String?
+  wishlistId    Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  wishlist      Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  pollId        Int?           @map("poll_id")
+  poll          Poll?          @relation("PollItems", fields: [pollId], references: [id])
+
+  @@index([wishlistId], name: "idx_item_wishlist")
+}
+
+model PaymentInfo {
+  id            Int            @id @default(autoincrement())
+  paymentMethod String
+  accountHolder String
+  accountNumber String
+  userId        Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_paymentinfo_user")
+}
+
+model Collaborator {
+  id            Int            @id @default(autoincrement())
+  wishlistId    Int
+  userId        Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  wishlist      Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([wishlistId, userId], name: "idx_collaborator_wishlist_user")
+  @@unique([wishlistId, userId], name: "unique_wishlist_user")
+}
+
+model Poll {
+  id            Int            @id @default(autoincrement())
+  title         String
+  wishlistId    Int
+  items         Item[]         @relation("PollItems")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  wishlist      Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  @@index([wishlistId], name: "idx_poll_wishlist")
+}
