@@ -23,32 +23,32 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    console.log("Attempting to find user by email:", email); // Log the email being searched for
+    console.log("Attempting to find user by email:", email);
     const user = await UserModel.findUserByEmail(email);
 
     if (!user) {
-      console.log("User not found for email:", email); // Log when no user is found for the email
+      console.log("User not found for email:", email);
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    console.log("User found, comparing password..."); // Log the password comparison attempt
+    console.log("User found, comparing password...");
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      console.log("Password does not match for user:", email); // Log a failed password comparison
+      console.log("Password does not match for user:", email);
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    console.log("Password matched, generating token..."); // Log the token generation
+    console.log("Password matched, generating token...");
     const token = UserModel.generateToken(user.id);
 
-    console.log("Login successful for user:", email); // Log a successful login
+    console.log("Login successful for user:", email);
     return successResponse(res, "Login successful", {
       token,
       hasSetUsername: user.hasSetUsername,
     });
   } catch (error) {
-    console.error("Error during login process for user:", email, error); // Log any errors caught during login
+    console.error("Error during login process for user:", email, error);
     return errorResponse(res, "Server error during login", 500);
   }
 };
