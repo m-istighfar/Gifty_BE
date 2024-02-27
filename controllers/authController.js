@@ -3,20 +3,20 @@ const { validationResult } = require("express-validator");
 const { successResponse, errorResponse } = require("../utils/response");
 
 exports.register = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return errorResponse(res, "Validation failed", 400);
-  }
-
   const { name, email, password } = req.body;
   try {
+    const existingUser = await UserModel.findUserByEmail(email);
+    if (existingUser) {
+      return errorResponse(res, "Email is already in use", 400);
+    }
+
     const user = await UserModel.createUser(name, email, password);
 
     return successResponse(res, "User registered successfully", {
       userId: user.id,
     });
   } catch (error) {
-    return errorResponse(res, "Failed to register user", 500);
+    return errorResponse(res, "Server error during registration", null, 500);
   }
 };
 
@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
       hasSetUsername: user.hasSetUsername,
     });
   } catch (error) {
-    return errorResponse(res, "Login failed", 500);
+    return errorResponse(res, "Server error during login", 500);
   }
 };
 
@@ -48,6 +48,11 @@ exports.setUsername = async (req, res) => {
   const { userId } = req.user;
 
   try {
+    const isUsernameTaken = await UserModel.isUsernameTaken(username, userId);
+    if (isUsernameTaken) {
+      return errorResponse(res, "Username is already taken", 400);
+    }
+
     if (username) {
       const updatedUser = await UserModel.updateUserUsername(userId, username);
       return successResponse(res, "Username set successfully", {
@@ -57,6 +62,6 @@ exports.setUsername = async (req, res) => {
       return errorResponse(res, "Username is required", 400);
     }
   } catch (error) {
-    return errorResponse(res, "Failed to set username", 500);
+    return errorResponse(res, "Server error setting username", 500);
   }
 };

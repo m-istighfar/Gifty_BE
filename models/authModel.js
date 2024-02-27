@@ -30,6 +30,18 @@ class UserModel {
     }
   }
 
+  static async isUsernameTaken(username, userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { username },
+      });
+      return Boolean(user && user.id !== userId);
+    } catch (error) {
+      console.error("Error checking username uniqueness:", error);
+      throw new Error("Database error checking username");
+    }
+  }
+
   static async updateUserUsername(userId, username) {
     try {
       const updatedUser = await prisma.user.update({
