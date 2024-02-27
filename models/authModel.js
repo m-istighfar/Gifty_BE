@@ -55,7 +55,7 @@ class UserModel {
   }
 
   static generateToken(userId) {
-    const secret = process.env.JWT_SECRET;
+    const secret = process.env.JWT_SIGN;
     return jwt.sign({ userId }, secret, { expiresIn: "1h" });
   }
 }
