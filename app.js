@@ -35,7 +35,7 @@ applyMiddleware(app);
 
 // app.use(databaseMiddleware);
 
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use(errorFormatter);
 
