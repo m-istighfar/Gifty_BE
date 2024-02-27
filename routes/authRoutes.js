@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require("../controllers/AuthController");
 const authValidation = require("../validations/authValidation");
 const validateRequests = require("../middleware/validateRequests");
+const authenticationMiddleware = require("../middleware/authenticationMiddleware");
 
 router.post(
   "/register",
@@ -19,7 +20,8 @@ router.post(
 );
 
 router.put(
-  "/setUsername",
+  "/set-username",
+  authenticationMiddleware,
   authValidation.setUsernameValidation,
   validateRequests,
   authController.setUsername
