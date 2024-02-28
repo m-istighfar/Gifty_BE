@@ -8,7 +8,6 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const yaml = require("yaml");
 const fs = require("fs");
-// const OpenApiValidator = require("express-openapi-validator");
 
 const authMiddleware = require("./middleware/authenticationMiddleware");
 const authorizationMiddleware = require("./middleware/authorizationMiddleware");
@@ -16,6 +15,7 @@ const errorFormatter = require("./middleware/errorFormatter");
 const applyMiddleware = require("./middleware/index");
 
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -36,6 +36,12 @@ applyMiddleware(app);
 // app.use(databaseMiddleware);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/user", authMiddleware, userRoutes);
+
+app.use((req, res, next) => {
+  console.log(req.method, req.path);
+  next();
+});
 
 app.use(errorFormatter);
 
