@@ -1,12 +1,13 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SIGN } = require("../config/jwt.js");
+const { errorResponse } = require("../utils/response");
 
 const authorizationMiddleware = (allowedRoles) => {
   return (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse(res, "Unauthorized - No token provided", 401);
     }
 
     const token = authHeader.split(" ")[1];
@@ -17,10 +18,14 @@ const authorizationMiddleware = (allowedRoles) => {
       if (allowedRoles.includes(decodedToken.role)) {
         next();
       } else {
-        res.status(401).json({ error: "Unauthorized" });
+        errorResponse(res, "Forbidden - User does not have permission", 403);
       }
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const message =
+        error.name === "TokenExpiredError"
+          ? "Unauthorized - Token expired"
+          : "Unauthorized - Invalid token";
+      errorResponse(res, message, 401);
     }
   };
 };
