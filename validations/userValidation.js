@@ -13,3 +13,9 @@ exports.paymentInfoValidationRules = () => [
     .isLength({ min: 5 })
     .withMessage("Account number must be at least 5 characters long"),
 ];
+
+exports.setUsernameValidation = [
+  body("username")
+    .isLength({ min: 3 })
+    .withMessage("Username must be at least 3 characters long"),
+];

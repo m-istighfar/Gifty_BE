@@ -1,4 +1,4 @@
-const UserModel = require("../models/userModel");
+const userModel = require("../models/userModel");
 const { successResponse, errorResponse } = require("../utils/response");
 
 exports.createPaymentInfo = async (req, res) => {
@@ -10,7 +10,7 @@ exports.createPaymentInfo = async (req, res) => {
   }
 
   try {
-    const existingPaymentInfo = await UserModel.findPaymentInfoByUserId(userId);
+    const existingPaymentInfo = await userModel.findPaymentInfoByUserId(userId);
     if (existingPaymentInfo) {
       return errorResponse(
         res,
@@ -19,7 +19,7 @@ exports.createPaymentInfo = async (req, res) => {
       );
     }
 
-    const paymentInfo = await UserModel.createPaymentInfo(
+    const paymentInfo = await userModel.createPaymentInfo(
       userId,
       paymentMethod,
       accountHolder,
@@ -56,7 +56,7 @@ exports.updatePaymentInfo = async (req, res) => {
   }
 
   try {
-    const existingPaymentInfo = await UserModel.findPaymentInfoById(
+    const existingPaymentInfo = await userModel.findPaymentInfoById(
       paymentInfoId
     );
 
@@ -68,7 +68,7 @@ exports.updatePaymentInfo = async (req, res) => {
       );
     }
 
-    const paymentInfo = await UserModel.updatePaymentInfo(
+    const paymentInfo = await userModel.updatePaymentInfo(
       parseInt(paymentInfoId),
       paymentMethod,
       accountHolder,
@@ -87,5 +87,28 @@ exports.updatePaymentInfo = async (req, res) => {
       error
     );
     return errorResponse(res, "Server error updating payment information", 500);
+  }
+};
+
+exports.setUsername = async (req, res) => {
+  const { username } = req.body;
+  const { userId } = req.user;
+
+  try {
+    const isUsernameTaken = await userModel.isUsernameTaken(username, userId);
+    if (isUsernameTaken) {
+      return errorResponse(res, "Username is already taken", 400);
+    }
+
+    if (username) {
+      const updatedUser = await userModel.updateUserUsername(userId, username);
+      return successResponse(res, "Username set successfully", {
+        userId: updatedUser.id,
+      });
+    } else {
+      return errorResponse(res, "Username is required", 400);
+    }
+  } catch (error) {
+    return errorResponse(res, "Server error setting username", 500);
   }
 };

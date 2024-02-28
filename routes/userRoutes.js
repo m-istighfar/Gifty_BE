@@ -5,6 +5,13 @@ const userValidation = require("../validations/userValidation");
 const authenticationMiddleware = require("../middleware/authenticationMiddleware");
 const validateRequests = require("../middleware/validateRequests");
 
+router.put(
+  "/set-username",
+  userValidation.setUsernameValidation,
+  validateRequests,
+  userController.setUsername
+);
+
 router.post(
   "/payment-info",
   userValidation.paymentInfoValidationRules(),

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-class UserModel {
+class authModel {
   static async createUser(name, email, password) {
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
@@ -30,34 +30,10 @@ class UserModel {
     }
   }
 
-  static async isUsernameTaken(username, userId) {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { username },
-      });
-      return Boolean(user && user.id !== userId);
-    } catch (error) {
-      console.error("Error checking username uniqueness:", error);
-      throw new Error("Database error checking username");
-    }
-  }
-
-  static async updateUserUsername(userId, username) {
-    try {
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { username, hasSetUsername: true },
-      });
-      return updatedUser;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
   static generateToken(userId) {
     const secret = process.env.JWT_SIGN;
     return jwt.sign({ userId }, secret, { expiresIn: "1h" });
   }
 }
 
-module.exports = UserModel;
+module.exports = authModel;

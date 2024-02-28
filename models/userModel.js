@@ -1,7 +1,30 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-class UserModel {
+class userModel {
+  static async isUsernameTaken(username, userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { username },
+      });
+      return Boolean(user && user.id !== userId);
+    } catch (error) {
+      console.error("Error checking username uniqueness:", error);
+      throw new Error("Database error checking username");
+    }
+  }
+
+  static async updateUserUsername(userId, username) {
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: { username, hasSetUsername: true },
+      });
+      return updatedUser;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
   static async findPaymentInfoByUserId(userId) {
     return prisma.paymentInfo.findFirst({
       where: { userId },
@@ -49,4 +72,4 @@ class UserModel {
   }
 }
 
-module.exports = UserModel;
+module.exports = userModel;
