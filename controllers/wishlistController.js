@@ -26,11 +26,6 @@ exports.createWishlist = async (req, res) => {
   }
 
   try {
-    const existingWishlist = await wishlistModel.findWishlistByUserId(userId);
-    if (existingWishlist) {
-      return errorResponse(res, "Wishlist already exists.", 409);
-    }
-
     const wishlist = await wishlistModel.createWishlist(
       title,
       description,
