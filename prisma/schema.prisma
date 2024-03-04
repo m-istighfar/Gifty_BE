@@ -104,3 +104,38 @@ model Poll {
 
   @@index([wishlistId], name: "idx_poll_wishlist")
 }
+
+model Result {
+  id              Int            @id @default(autoincrement())
+  tax             Float
+  deliveryFee     Float
+  discount        Float
+  totalPrice      Float
+  accountNumber   String
+  userId          Int
+  wishlistId      Int
+  itemId          Int
+  paymentId       Int
+  collaboratorId  Int
+  amountToPay     Float            // New field to store the amount each collaborator needs to pay
+  winningItemId   Int              // Field to store the ID of the winning item
+  pollId          Int              // Field to store the ID of the poll
+
+  user            User           @relation(fields: [userId], references: [id])
+  wishlist        Wishlist       @relation(fields: [wishlistId], references: [id])
+  item            Item           @relation(fields: [itemId], references: [id])
+  paymentInfo     PaymentInfo    @relation(fields: [paymentId], references: [id])
+  collaborator    Collaborator   @relation(fields: [collaboratorId], references: [id])
+  winningItem     Item?          @relation(fields: [winningItemId], references: [id])
+  poll            Poll           @relation(fields: [pollId], references: [id])
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId], name: "idx_result_user")
+  @@index([wishlistId], name: "idx_result_wishlist")
+  @@index([itemId], name: "idx_result_item")
+  @@index([paymentId], name: "idx_result_paymentinfo")
+  @@index([collaboratorId], name: "idx_result_collaborator")
+  @@index([pollId], name: "idx_result_poll")
+}
