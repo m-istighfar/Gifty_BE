@@ -16,7 +16,7 @@ const applyMiddleware = require("./middleware/index");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const wishlistRoutes = require("./routes/wishlistRoutes")
+const wishlistRoutes = require("./routes/wishlistRoutes");
 const itemRoutes = require("./routes/itemRoutes");
 
 const app = express();
