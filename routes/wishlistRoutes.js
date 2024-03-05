@@ -1,14 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const wishlistController = require("../controllers/WishlistController");
+const wishlistController = require("../controllers/wishlistController");
 const wishlistValidation = require("../validations/wishlistValidation");
 const validateRequests = require("../middleware/validateRequests");
 
-router.get(
-  "",
-  validateRequests,
-  wishlistController.getAllWishlists
-);
+router.get("", validateRequests, wishlistController.getAllWishlists);
 
 router.post(
   "",
