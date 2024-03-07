@@ -12,32 +12,30 @@ exports.getAllPolls = async (req, res) => {
 };
 
 exports.createPoll = async (req, res) => {
-  const { userId } = req.user;
-  const { title, wishlistId } = req.body;
+  const userId = req.user.userId;
+  const wishlistId = req.params.wishlistId;
+  console.log("Received wishlistId:", wishlistId);
+  const { title, optionIds } = req.body;
 
-  if (!userId) {
-    return errorResponse(res, "User ID is missing.", 400);
-  }
-
-  if (!wishlistId) {
-    return errorResponse(res, "Wishlist ID is missing.", 400);
+  if (!wishlistId || isNaN(wishlistId) || parseInt(wishlistId) <= 0) {
+    return errorResponse(res, "Invalid wishlist ID", 400);
   }
 
   try {
-    const isUserWishlist = await pollModel.isUserWishlist(userId, wishlistId);
-
-    if (!isUserWishlist) {
-      return errorResponse(
-        res,
-        "You are not authorized to create a poll for this wishlist.",
-        403
-      );
+    const isValidWishlistAndOptions =
+      await pollModel.validateWishlistAndOptions(userId, wishlistId, optionIds);
+    if (!isValidWishlistAndOptions) {
+      return errorResponse(res, "Invalid wishlist or options", 400);
     }
 
-    const poll = await pollModel.createPoll(userId, title, wishlistId);
+    const poll = await pollModel.createPollWithOptionIds(
+      title,
+      wishlistId,
+      optionIds
+    );
     return successResponse(res, "Poll created successfully", poll, 201);
   } catch (error) {
-    console.error("Error during poll creation for user:", userId, error);
+    console.error("Error creating poll:", error);
     return errorResponse(res, "Server error creating poll", 500);
   }
 };

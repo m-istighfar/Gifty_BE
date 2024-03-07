@@ -5,7 +5,7 @@ const validateRequests = require("../middleware/validateRequests");
 const pollValidation = require("../validations/pollValidation");
 
 router.post(
-  "/createPoll",
+  "/createPoll/:wishlistId",
   pollValidation.pollValidationRules(),
   validateRequests,
   pollController.createPoll

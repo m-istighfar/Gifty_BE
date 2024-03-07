@@ -2,39 +2,43 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 class PollModel {
-  static async createPoll(userId, title, wishlistId) {
-    try {
-      const isUserWishlist = await this.isUserWishlist(userId, wishlistId);
-      if (!isUserWishlist) {
-        throw new Error(
-          "You are not authorized to create a poll for this wishlist."
-        );
-      }
+  static async validateWishlistAndOptions(userId, wishlistId, optionIds) {
+    const wishlist = await prisma.wishlist.findUnique({
+      where: { id: parseInt(wishlistId) },
+    });
 
-      const poll = await prisma.poll.create({
-        data: {
-          title,
-          wishlistId: parseInt(wishlistId, 10),
-        },
-      });
-
-      const items = await prisma.item.findMany({
-        where: {
-          wishlistId: parseInt(wishlistId, 10),
-        },
-      });
-
-      for (const item of items) {
-        await prisma.item.update({
-          where: { id: item.id },
-          data: { pollId: poll.id },
-        });
-      }
-
-      return poll;
-    } catch (error) {
-      throw new Error("Error creating poll: " + error.message);
+    if (!wishlist || wishlist.userId !== userId) {
+      return false;
     }
+
+    const options = await prisma.item.findMany({
+      where: {
+        id: { in: optionIds },
+        wishlistId: parseInt(wishlistId),
+      },
+    });
+
+    return options.length === optionIds.length;
+  }
+
+  static async createPollWithOptionIds(title, wishlistId, optionIds) {
+    const poll = await prisma.poll.create({
+      data: {
+        title,
+        wishlistId: parseInt(wishlistId),
+      },
+    });
+
+    await Promise.all(
+      optionIds.map((optionId) =>
+        prisma.item.update({
+          where: { id: optionId },
+          data: { pollId: poll.id },
+        })
+      )
+    );
+
+    return poll;
   }
 
   static async isUserWishlist(userId, wishlistId) {
@@ -52,7 +56,9 @@ class PollModel {
 
   static async getAllPolls() {
     try {
-      const polls = await prisma.poll.findMany();
+      const polls = await prisma.poll.findMany({
+        include: { items: true },
+      });
       return polls;
     } catch (error) {
       throw new Error("Error fetching polls: " + error.message);
@@ -63,6 +69,7 @@ class PollModel {
     try {
       const poll = await prisma.poll.findUnique({
         where: { id: parseInt(pollId, 10) },
+        include: { items: true },
       });
       return poll;
     } catch (error) {
