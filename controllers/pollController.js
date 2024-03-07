@@ -1,6 +1,16 @@
 const pollModel = require("../models/pollModel");
 const { successResponse, errorResponse } = require("../utils/response");
 
+exports.getAllPolls = async (req, res) => {
+  try {
+    const polls = await pollModel.getAllPolls();
+    return successResponse(res, "All polls fetched successfully", polls, 200);
+  } catch (error) {
+    console.error("Error fetching polls:", error);
+    return errorResponse(res, "Server error fetching polls", 500);
+  }
+};
+
 exports.createPoll = async (req, res) => {
   const { userId } = req.user;
   const { title, wishlistId } = req.body;

@@ -49,6 +49,15 @@ class PollModel {
 
     return wishlist.userId === userId;
   }
+
+  static async getAllPolls() {
+    try {
+      const polls = await prisma.poll.findMany();
+      return polls;
+    } catch (error) {
+      throw new Error("Error fetching polls: " + error.message);
+    }
+  }
 }
 
 module.exports = PollModel;

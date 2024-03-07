@@ -11,4 +11,7 @@ router.post(
   pollController.createPoll
 );
 
+router.get("/getAll", pollController.getAllPolls);
+router.get("/getPollById/:pollId", pollController.getPollById);
+
 module.exports = router;
