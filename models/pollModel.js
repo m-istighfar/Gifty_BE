@@ -58,6 +58,17 @@ class PollModel {
       throw new Error("Error fetching polls: " + error.message);
     }
   }
+
+  static async getPollById(pollId) {
+    try {
+      const poll = await prisma.poll.findUnique({
+        where: { id: parseInt(pollId, 10) },
+      });
+      return poll;
+    } catch (error) {
+      throw new Error("Error fetching poll by ID: " + error.message);
+    }
+  }
 }
 
 module.exports = PollModel;

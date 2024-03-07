@@ -41,3 +41,20 @@ exports.createPoll = async (req, res) => {
     return errorResponse(res, "Server error creating poll", 500);
   }
 };
+
+exports.getPollById = async (req, res) => {
+  const { pollId } = req.params;
+
+  try {
+    const poll = await pollModel.getPollById(pollId);
+
+    if (!poll) {
+      return errorResponse(res, "Poll not found", 404);
+    }
+
+    return successResponse(res, "Poll fetched successfully", poll, 200);
+  } catch (error) {
+    console.error("Error fetching poll:", error);
+    return errorResponse(res, "Server error fetching poll", 500);
+  }
+};
