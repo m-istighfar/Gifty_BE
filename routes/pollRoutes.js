@@ -13,5 +13,7 @@ router.post(
 
 router.get("/get", pollController.getAllPolls);
 router.get("/get/:pollId", pollController.getPollById);
+router.post("/submit-vote/:pollId", pollController.submitVote);
+router.get("/get-results/:pollId", pollController.getPollResults);
 
 module.exports = router;
