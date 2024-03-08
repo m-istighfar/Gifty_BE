@@ -21,11 +21,19 @@ class PollModel {
     return options.length === optionIds.length;
   }
 
-  static async createPollWithOptionIds(title, wishlistId, optionIds) {
+  static async createPollWithOptionIds(
+    title,
+    wishlistId,
+    optionIds,
+    startTime,
+    endTime
+  ) {
     const poll = await prisma.poll.create({
       data: {
         title,
         wishlistId: parseInt(wishlistId),
+        startTime,
+        endTime: new Date(endTime),
       },
     });
 
@@ -68,12 +76,28 @@ class PollModel {
   static async getPollById(pollId) {
     try {
       const poll = await prisma.poll.findUnique({
-        where: { id: parseInt(pollId, 10) },
+        where: { id: Number(pollId) },
         include: { items: true },
       });
       return poll;
     } catch (error) {
       throw new Error("Error fetching poll by ID: " + error.message);
+    }
+  }
+
+  static async getPollResults(pollId) {
+    try {
+      const pollResults = await prisma.item.findMany({
+        where: { pollId: parseInt(pollId, 10) },
+        include: {
+          _count: {
+            select: { votes: true },
+          },
+        },
+      });
+      return pollResults;
+    } catch (error) {
+      throw new Error("Error fetching poll results: " + error.message);
     }
   }
 }
