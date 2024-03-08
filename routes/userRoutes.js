@@ -26,4 +26,7 @@ router.put(
   userController.updatePaymentInfo
 );
 
+router.get("/get", userController.getAllUsers);
+router.get("/get/:userId", userController.getUserById);
+
 module.exports = router;
