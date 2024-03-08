@@ -14,13 +14,13 @@ exports.getAllPolls = async (req, res) => {
 exports.createPoll = async (req, res) => {
   const userId = req.user.userId;
   const wishlistId = req.params.wishlistId;
-  console.log("Received wishlistId:", wishlistId);
-  const { title, optionIds } = req.body;
+  const { title, optionIds, startTime } = req.body;
 
   if (!wishlistId || isNaN(wishlistId) || parseInt(wishlistId) <= 0) {
     return errorResponse(res, "Invalid wishlist ID", 400);
   }
 
+  const endTime = new Date(new Date(startTime).getTime() + 60 * 60 * 1000);
   try {
     const isValidWishlistAndOptions =
       await pollModel.validateWishlistAndOptions(userId, wishlistId, optionIds);
@@ -31,7 +31,9 @@ exports.createPoll = async (req, res) => {
     const poll = await pollModel.createPollWithOptionIds(
       title,
       wishlistId,
-      optionIds
+      optionIds,
+      startTime,
+      endTime
     );
     return successResponse(res, "Poll created successfully", poll, 201);
   } catch (error) {
