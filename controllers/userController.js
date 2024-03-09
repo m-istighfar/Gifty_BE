@@ -50,7 +50,7 @@ exports.createPaymentInfo = async (req, res) => {
       userId,
       paymentMethod,
       accountHolder,
-      accountNumber
+      accountNumber.toString()
     );
 
     return successResponse(
@@ -99,7 +99,7 @@ exports.updatePaymentInfo = async (req, res) => {
       parseInt(paymentInfoId),
       paymentMethod,
       accountHolder,
-      accountNumber
+      accountNumber.toString()
     );
 
     return successResponse(

@@ -50,7 +50,7 @@ class userModel {
         userId,
         paymentMethod,
         accountHolder,
-        accountNumber,
+        accountNumber: accountNumber.toString(),
       },
     });
   }
@@ -66,7 +66,7 @@ class userModel {
       data: {
         paymentMethod,
         accountHolder,
-        accountNumber,
+        accountNumber: accountNumber.toString(),
       },
     });
   }
