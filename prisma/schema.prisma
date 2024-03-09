@@ -71,7 +71,7 @@ model PaymentInfo {
   id            Int            @id @default(autoincrement())
   paymentMethod String
   accountHolder String
-  accountNumber String
+  accountNumber Int
   userId        Int
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
