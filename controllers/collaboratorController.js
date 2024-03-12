@@ -1,7 +1,6 @@
 const collabModel = require("../models/collaboratorModel");
 const { successResponse, errorResponse } = require("../utils/response");
 const FE_URL = process.env.FE_URL;
-const wishlistMap = new Map();
 
 exports.addCollabByUsername = async (req, res) => {
   const { userId } = req.user;
@@ -34,6 +33,11 @@ exports.addCollabByUsername = async (req, res) => {
     }
 
     const collabId = existingUsername.id;
+    const existingCollab = await collabModel.findCollaborator(collabId);
+
+    if (existingCollab) {
+      return errorResponse(res, "Collaborator already added", 409);
+    }
 
     const collab = await collabModel.createCollab(wishlistId, collabId);
 
@@ -69,7 +73,7 @@ exports.generateInvitationLink = async (req, res) => {
 
     const linkData = await collabModel.generateLink(wishlistId);
 
-    const inviteLink = `${FE_URL}/invitation?encryptedData=${linkData.encryptedData}&iv=${linkData.iv}`;
+    const inviteLink = `${FE_URL}/invitation?encryptedData=${linkData.wishlistId}&iv=${linkData.iv}`;
 
     return successResponse(res, "Link created successfully", inviteLink, 201);
   } catch (error) {
@@ -109,12 +113,18 @@ exports.invitationAcceptance = async (req, res) => {
       }
     }
 
-    const wishlistId = await collabModel.decodeLink(encryptedData, iv);
-    const collabId = await collabModel.findUserByUserId(userId);
+    const wishlistId = encryptedData;
+    const existingUser = await collabModel.findUserByUserId(userId);
+    const collabId = existingUser.id;
+    // const existingCollab = await collabModel.findCollaborator(wishlistId, collabId);
 
-    const collab = await collabModel.createCollab(wishlistId, collabId);
+    // if (!existingCollab) {
+      const collab = await collabModel.createCollab(wishlistId, collabId);
+      return successResponse(res, "Collaborator added successfully", collab, 201);
+    // } else {
+      // return errorResponse(res, "Collaborator already added", 409);
+    // }
 
-    return successResponse(res, "Collaborator added successfully", collab, 201);
   } catch (error) {
     console.error("Error during join wishlist for user:", userId, error);
     return errorResponse(res, "Server error during joining wishlist", 500);
