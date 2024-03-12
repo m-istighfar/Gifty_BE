@@ -1,6 +1,33 @@
 const userModel = require("../models/userModel");
 const { successResponse, errorResponse } = require("../utils/response");
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await userModel.findAllUsers({
+      exclude: ["wishlists", "paymentInfos", "collaborators"],
+    });
+    return successResponse(res, "All users fetched successfully", users);
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    return errorResponse(res, "Server error fetching all users", 500);
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await userModel.findUserById(parseInt(userId, 10));
+    if (!user) {
+      return errorResponse(res, "User not found", 404);
+    }
+    return successResponse(res, "User fetched successfully", user);
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return errorResponse(res, "Server error fetching user by ID", 500);
+  }
+};
+
 exports.createPaymentInfo = async (req, res) => {
   const { userId } = req.user;
   const { paymentMethod, accountHolder, accountNumber } = req.body;
@@ -23,7 +50,7 @@ exports.createPaymentInfo = async (req, res) => {
       userId,
       paymentMethod,
       accountHolder,
-      accountNumber
+      accountNumber.toString()
     );
 
     return successResponse(
@@ -72,7 +99,7 @@ exports.updatePaymentInfo = async (req, res) => {
       parseInt(paymentInfoId),
       paymentMethod,
       accountHolder,
-      accountNumber
+      accountNumber.toString()
     );
 
     return successResponse(

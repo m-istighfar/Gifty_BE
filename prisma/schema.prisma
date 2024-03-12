@@ -6,6 +6,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 enum WishlistType {
@@ -24,6 +25,7 @@ model User {
   wishlists      Wishlist[]
   paymentInfos   PaymentInfo[]
   collaborators  Collaborator[]
+  votes         Vote[]
 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -60,6 +62,7 @@ model Item {
   wishlist      Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
   pollId        Int?           @map("poll_id")
   poll          Poll?          @relation("PollItems", fields: [pollId], references: [id])
+  votes        Vote[]
 
   @@index([wishlistId], name: "idx_item_wishlist")
 }
@@ -97,45 +100,27 @@ model Poll {
   title         String
   wishlistId    Int
   items         Item[]         @relation("PollItems")
+  startTime     DateTime?
+  endTime       DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   wishlist      Wishlist       @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  votes        Vote[]
 
   @@index([wishlistId], name: "idx_poll_wishlist")
 }
 
-model Result {
-  id              Int            @id @default(autoincrement())
-  tax             Float
-  deliveryFee     Float
-  discount        Float
-  totalPrice      Float
-  accountNumber   String
-  userId          Int
-  wishlistId      Int
-  itemId          Int
-  paymentId       Int
-  collaboratorId  Int
-  amountToPay     Float            // New field to store the amount each collaborator needs to pay
-  winningItemId   Int              // Field to store the ID of the winning item
-  pollId          Int              // Field to store the ID of the poll
+model Vote {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  pollId    Int
+  itemId    Int
+  createdAt DateTime @default(now())
 
-  user            User           @relation(fields: [userId], references: [id])
-  wishlist        Wishlist       @relation(fields: [wishlistId], references: [id])
-  item            Item           @relation(fields: [itemId], references: [id])
-  paymentInfo     PaymentInfo    @relation(fields: [paymentId], references: [id])
-  collaborator    Collaborator   @relation(fields: [collaboratorId], references: [id])
-  winningItem     Item?          @relation(fields: [winningItemId], references: [id])
-  poll            Poll           @relation(fields: [pollId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  @@index([userId], name: "idx_result_user")
-  @@index([wishlistId], name: "idx_result_wishlist")
-  @@index([itemId], name: "idx_result_item")
-  @@index([paymentId], name: "idx_result_paymentinfo")
-  @@index([collaboratorId], name: "idx_result_collaborator")
-  @@index([pollId], name: "idx_result_poll")
+  @@unique([userId, pollId], name: "one_vote_per_user_per_poll")
 }
