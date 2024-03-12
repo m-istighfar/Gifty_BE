@@ -50,7 +50,7 @@ class userModel {
         userId,
         paymentMethod,
         accountHolder,
-        accountNumber,
+        accountNumber: accountNumber.toString(),
       },
     });
   }
@@ -66,9 +66,48 @@ class userModel {
       data: {
         paymentMethod,
         accountHolder,
-        accountNumber,
+        accountNumber: accountNumber.toString(),
       },
     });
+  }
+
+  static async findAllUsers() {
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+        },
+      });
+      return users;
+    } catch (error) {
+      console.error("Error fetching all users from database:", error);
+      throw new Error("Database error fetching all users");
+    }
+  }
+
+  static async findUserById(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          name: true,
+          profileImage: true,
+          wishlists: true,
+          paymentInfos: true,
+          collaborators: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      console.error("Error fetching user by ID:", error);
+      throw new Error("Database error fetching user by ID");
+    }
   }
 }
 
