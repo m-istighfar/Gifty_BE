@@ -37,20 +37,14 @@ exports.login = async (req, res) => {
 
     const token = authModel.generateToken(user.id);
 
-    if (user.hasSetUsername) {
-      return successResponse(res, "Login successful", {
-        token,
-        hasSetUsername: true,
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-      });
-    } else {
-      return successResponse(res, "Login successful", {
-        token,
-        hasSetUsername: false,
-      });
-    }
+    return successResponse(res, "Login successful", {
+      token,
+      hasSetUsername: user.hasSetUsername,
+      hasSetPayment: user.hasSetPayment,
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+    });
   } catch (error) {
     return errorResponse(res, "Server error during login", 500);
   }
