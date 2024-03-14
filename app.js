@@ -20,6 +20,8 @@ const userRoutes = require("./routes/userRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const itemRoutes = require("./routes/itemRoutes");
 const pollRoutes = require("./routes/pollRoutes");
+const doneRoutes = require("./routes/doneRoutes")
+const splitbillsRoutes = require("./routes/splitbillsRoutes")
 
 const app = express();
 app.use(cors());
@@ -45,6 +47,8 @@ app.use("/api/user", authMiddleware, userRoutes);
 app.use("/api/wishlist", authMiddleware, wishlistRoutes);
 app.use("/api/wishlist-item", authMiddleware, itemRoutes);
 app.use("/api/poll", authMiddleware, pollRoutes);
+app.use("/api/done", authMiddleware, doneRoutes);
+app.use("/api/splitbills", authMiddleware, splitbillsRoutes);
 
 app.use((req, res, next) => {
   console.log(req.method, req.path);
