@@ -45,14 +45,27 @@ class userModel {
     accountHolder,
     accountNumber
   ) {
-    return prisma.paymentInfo.create({
-      data: {
-        userId,
-        paymentMethod,
-        accountHolder,
-        accountNumber: accountNumber.toString(),
-      },
-    });
+    try {
+      const result = await prisma.$transaction([
+        prisma.paymentInfo.create({
+          data: {
+            userId,
+            paymentMethod,
+            accountHolder,
+            accountNumber: accountNumber.toString(),
+          },
+        }),
+        prisma.user.update({
+          where: { id: userId },
+          data: { hasSetPayment: true },
+        }),
+      ]);
+
+      return result[0];
+    } catch (error) {
+      console.error("Error during payment information creation:", error);
+      throw new Error("Failed to create payment information and update user.");
+    }
   }
 
   static async updatePaymentInfo(
