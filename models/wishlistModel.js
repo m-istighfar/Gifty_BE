@@ -5,6 +5,18 @@ class wishlistModel {
   static async findWishlistsByUserId(userId) {
     return prisma.wishlist.findMany({
       where: { userId },
+      include: {
+        collaborators: {
+          select: { 
+            userId: true,
+            user: {
+              select: {
+                email: true,
+              }
+            }
+          }
+        }
+      }
     });
   }
 
