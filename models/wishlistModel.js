@@ -7,16 +7,17 @@ class wishlistModel {
       where: { userId },
       include: {
         collaborators: {
-          select: { 
+          select: {
             userId: true,
             user: {
               select: {
                 email: true,
-              }
-            }
-          }
-        }
-      }
+                username: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -29,7 +30,20 @@ class wishlistModel {
   static async findWishlistById(wishlistId) {
     return prisma.wishlist.findUnique({
       where: {
-        id: parseInt(wishlistId, 20),
+        id: parseInt(wishlistId),
+      },
+      include: {
+        collaborators: {
+          select: {
+            userId: true,
+            user: {
+              select: {
+                email: true,
+                username: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -43,6 +57,52 @@ class wishlistModel {
         type,
         userId,
       },
+    });
+  }
+
+  static async createWishlistWithCollaborators(
+    title,
+    description,
+    eventDate,
+    type,
+    userId,
+    collabIds
+  ) {
+    return prisma.$transaction(async (prisma) => {
+      const wishlist = await prisma.wishlist.create({
+        data: {
+          title,
+          description,
+          eventDate,
+          type,
+          userId,
+        },
+      });
+
+      if (collabIds && collabIds.length > 0) {
+        const uniqueCollabIds = [...new Set(collabIds)].filter(
+          (id) => id !== userId
+        );
+
+        const collaboratorsData = uniqueCollabIds.map((collabId) => {
+          return {
+            wishlistId: wishlist.id,
+            userId: collabId,
+          };
+        });
+
+        await prisma.collaborator.createMany({
+          data: collaboratorsData,
+          skipDuplicates: true,
+        });
+      }
+
+      return prisma.wishlist.findUnique({
+        where: { id: wishlist.id },
+        include: {
+          collaborators: true,
+        },
+      });
     });
   }
 
