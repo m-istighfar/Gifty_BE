@@ -33,7 +33,7 @@ exports.addCollabByUsername = async (req, res) => {
     }
 
     const collabId = existingUsername.id;
-    const existingCollab = await collabModel.findCollaborator(collabId);
+    const existingCollab = collabModel.findCollaborator(collabId);
 
     if (existingCollab) {
       return errorResponse(res, "Collaborator already added", 409);
@@ -116,15 +116,14 @@ exports.invitationAcceptance = async (req, res) => {
     const wishlistId = encryptedData;
     const existingUser = await collabModel.findUserByUserId(userId);
     const collabId = existingUser.id;
-    // const existingCollab = await collabModel.findCollaborator(wishlistId, collabId);
+    const existingCollab = collabModel.findCollaborator(wishlistId, collabId);
 
-    // if (!existingCollab) {
-      const collab = await collabModel.createCollab(wishlistId, collabId);
-      return successResponse(res, "Collaborator added successfully", collab, 201);
-    // } else {
-      // return errorResponse(res, "Collaborator already added", 409);
-    // }
+    if (existingCollab) {
+      return errorResponse(res, "Collaborator already added", 409);
+    }
 
+    const collab = await collabModel.createCollab(wishlistId, collabId);
+    return successResponse(res, "Collaborator added successfully", collab, 201);
   } catch (error) {
     console.error("Error during join wishlist for user:", userId, error);
     return errorResponse(res, "Server error during joining wishlist", 500);
