@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SIGN } = require("../config/jwt.js");
+const { errorResponse } = require("../utils/response");
 
 const authenticationMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: "Unauthorized" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return errorResponse(res, "Unauthorized - No token provided", 401);
   }
 
   const token = authHeader.split(" ")[1];
@@ -15,7 +16,7 @@ const authenticationMiddleware = (req, res, next) => {
     req.user = decodedToken;
     next();
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    errorResponse(res, "Unauthorized - Invalid token", 401);
   }
 };
 
